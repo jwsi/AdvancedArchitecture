@@ -34,4 +34,4 @@ loop:
 
 # Exit point
 end:
-    sll $zero, $zero, 0   # Final nop
+    syscall   # Final nop
