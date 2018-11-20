@@ -15,6 +15,7 @@ class Simulator():
     clock = 0
     register_file = RegisterFile().reg # Create the parent register file for the simulator
     strikes = 0
+    instructions_executed = 0
 
     def __init__(self, input_file, stdscr):
         """
@@ -108,6 +109,7 @@ class Simulator():
         # Execute Stage in Pipeline
         if pipeline[self.clock - 1]["decode"] is not None:
             try:
+                self.instructions_executed += 1
                 pc, pipeline[self.clock]["execute"] = self.execute(pipeline[self.clock - 1]["decode"])
             except Interrupt:  # Catch Interrupts
                 self.print_state(pipeline)
@@ -136,27 +138,28 @@ class Simulator():
         """
         self.stdscr.addstr(3, 10, "Program Counter: " + str(self.pc), curses.color_pair(2))
         self.stdscr.addstr(4, 10, "Clock Cycles Taken: " + str(self.clock), curses.color_pair(3))
+        self.stdscr.addstr(5, 10, "Instructions Executed: " + str(self.instructions_executed), curses.color_pair(5))
         for i in range(34):
             offset = 100
             if i > 20:
                 offset += 20
             self.stdscr.addstr(i%20 + 2, offset, str(self.register_file[i][:2]).ljust(16))
         try:
-            self.stdscr.addstr(8, 10, "Pipeline Fetch:     " + str(self.decode(pipeline[self.clock]["fetch"]).description(self.register_file).ljust(64)), curses.color_pair(4))
+            self.stdscr.addstr(9, 10, "Pipeline Fetch:     " + str(self.decode(pipeline[self.clock]["fetch"]).description(self.register_file).ljust(64)), curses.color_pair(4))
         except:
-            self.stdscr.addstr(8, 10, "Pipeline Fetch:     Empty".ljust(72), curses.color_pair(4))
+            self.stdscr.addstr(9, 10, "Pipeline Fetch:     Empty".ljust(72), curses.color_pair(4))
         try:
-            self.stdscr.addstr(9, 10, "Pipeline Decode:    " + str(pipeline[self.clock]["decode"].description(self.register_file).ljust(64)), curses.color_pair(1))
+            self.stdscr.addstr(10, 10, "Pipeline Decode:    " + str(pipeline[self.clock]["decode"].description(self.register_file).ljust(64)), curses.color_pair(1))
         except:
-            self.stdscr.addstr(9, 10, "Pipeline Decode:    Empty".ljust(72), curses.color_pair(1))
+            self.stdscr.addstr(10, 10, "Pipeline Decode:    Empty".ljust(72), curses.color_pair(1))
         try:
-            self.stdscr.addstr(10, 10, "Pipeline Execute:   " + str(pipeline[self.clock-1]["decode"].description(self.register_file).ljust(64)), curses.color_pair(6))
+            self.stdscr.addstr(11, 10, "Pipeline Execute:   " + str(pipeline[self.clock-1]["decode"].description(self.register_file).ljust(64)), curses.color_pair(6))
         except:
-            self.stdscr.addstr(10, 10, "Pipeline Execute:   Empty".ljust(72), curses.color_pair(6))
+            self.stdscr.addstr(11, 10, "Pipeline Execute:   Empty".ljust(72), curses.color_pair(6))
         try:
-            self.stdscr.addstr(11, 10, "Pipeline Writeback: " + str(pipeline[self.clock-2]["decode"].description(self.register_file).ljust(64)), curses.color_pair(5))
+            self.stdscr.addstr(12, 10, "Pipeline Writeback: " + str(pipeline[self.clock-2]["decode"].description(self.register_file).ljust(64)), curses.color_pair(5))
         except:
-            self.stdscr.addstr(11, 10, "Pipeline Writeback: Empty".ljust(72), curses.color_pair(5))
+            self.stdscr.addstr(12, 10, "Pipeline Writeback: Empty".ljust(72), curses.color_pair(5))
             time.sleep(instruction_time) # Need to account for no writeback pause.
         self.stdscr.refresh()
 
@@ -175,7 +178,7 @@ class Simulator():
         self.stdscr.addstr(0, 10, "MACHINE INFORMATION", curses.A_BOLD)
         self.stdscr.addstr(2, 10, "Program: " + str(input_file), curses.color_pair(4))
         self.stdscr.addstr(4, 35, "Cycles per second: " + str(instruction_time), curses.color_pair(3))
-        self.stdscr.addstr(6, 10, "PIPELINE INFORMATION", curses.A_BOLD)
+        self.stdscr.addstr(7, 10, "PIPELINE INFORMATION", curses.A_BOLD)
 
 
     def shutdown(self):
